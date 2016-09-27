@@ -130,7 +130,7 @@
         </dc:FilterTemplate>
         <dc:ReturnAttributes>%{idp.attribute.resolver.LDAP.returnAttributes}</dc:ReturnAttributes>
         <dc:LDAPProperty name="java.naming.ldap.attributes.binary" value="objectSid" />
-        <!--<LDAPProperty name="java.naming.referral" value="follow"/>-->
+        <!--<dc:LDAPProperty name="java.naming.referral" value="follow"/>-->
     </resolver:DataConnector>
 
 </resolver:AttributeResolver>
