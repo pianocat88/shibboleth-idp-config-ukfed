@@ -18,6 +18,9 @@
     <!--                                                                                            -->
     <!-- ========================================================================================== -->
 
+    <!-- UK federation metadata configuration -->
+    <!-- https://www.ukfederation.org.uk/content/Documents/Setup3IdP#metadata -->
+    
     <MetadataProvider id="UKfederationMetadata"
                       xsi:type="FileBackedHTTPMetadataProvider"
                       backingFile="%{idp.home}/metadata/ukfederation-metadata.xml"
