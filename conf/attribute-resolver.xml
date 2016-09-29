@@ -30,16 +30,32 @@
     <!-- UK federation Core Attributes -->
 
     <!-- eduPersonAffiliation - this is usually the basis for the attribute eduPersonScopedAffiliation. It is not released to SPs. -->
-    <!-- In this case eduPersonAffiliation values are stored in the LDAP "affiliation" attribute -->
+    <!-- In this case eduPersonAffiliation values are stored in the LDAP "url" attribute along with eduPersonEntitlement values -->
+    <!-- A mapped attribute definition is used to pull out the affiliation values only -->
 
-    <resolver:AttributeDefinition id="eduPersonAffiliation" xsi:type="ad:Simple" sourceAttributeID="affiliation" dependencyOnly="true">
+
+    <resolver:AttributeDefinition id="eduPersonAffiliation" xsi:type="ad:Mapped" sourceAttributeID="url" dependencyOnly="true">
         <resolver:Dependency ref="myLDAP" />
+        <ad:DefaultValue passThru="false"/>
+
+        <ad:ValueMap>
+            <ad:ReturnValue>member</ad:ReturnValue>
+            <ad:SourceValue>member</ad:SourceValue>
+        </ad:ValueMap>
+        <ad:ValueMap>
+            <ad:ReturnValue>staff</ad:ReturnValue>
+            <ad:SourceValue>staff</ad:SourceValue>
+        </ad:ValueMap>
+        <ad:ValueMap>
+            <ad:ReturnValue>student</ad:ReturnValue>
+            <ad:SourceValue>student</ad:SourceValue>
+        </ad:ValueMap>
+
     </resolver:AttributeDefinition>
-
-
+ 
     <!-- eduPersonScopedAffiliation -->
 
-    <resolver:AttributeDefinition id="eduPersonScopedAffiliation" xsi:type="ad:Scoped" scope="%{idp.scope}">
+    <resolver:AttributeDefinition id="eduPersonScopedAffiliation" xsi:type="ad:Scoped" scope="%{idp.scope}" sourceAttributeID="eduPersonAffiliation">
         <resolver:Dependency ref="eduPersonAffiliation" />
 
         <resolver:AttributeEncoder xsi:type="SAML1ScopedString" xmlns="urn:mace:shibboleth:2.0:attribute:encoder"
@@ -87,31 +103,42 @@
     </resolver:AttributeDefinition>
 
     <!-- eduPersonEntitlement -->
+    <!-- In this case eduPersonAffiliation values are stored in the LDAP "url" attribute along with eduPersonEntitlement values -->
+    <!-- A mapped attribute definition is used to pull out the entitlement value only -->
 
-    <resolver:AttributeDefinition id="eduPersonEntitlement" xsi:type="ad:Simple" sourceAttributeID="webPageOther">
+
+    <resolver:AttributeDefinition id="eduPersonEntitlement" xsi:type="ad:Mapped" sourceAttributeID="url">
         <resolver:Dependency ref="myLDAP" />
-
         <resolver:AttributeEncoder xsi:type="SAML1String" xmlns="urn:mace:shibboleth:2.0:attribute:encoder"
             name="urn:mace:dir:attribute-def:eduPersonEntitlement" />
 
         <resolver:AttributeEncoder xsi:type="SAML2String" xmlns="urn:mace:shibboleth:2.0:attribute:encoder"
             name="urn:oid:1.3.6.1.4.1.5923.1.1.1.7" friendlyName="eduPersonEntitlement" />
+
+        <ad:DefaultValue passThru="false"/>
+
+        <ad:ValueMap>
+            <ad:ReturnValue>urn:mace:dir:entitlement:common-lib-terms</ad:ReturnValue>
+            <ad:SourceValue>urn:mace:dir:entitlement:common-lib-terms</ad:SourceValue>
+        </ad:ValueMap>
     </resolver:AttributeDefinition>
+
+
 
     <!-- ========================================== -->
     <!--      Data Connectors                       -->
     <!-- ========================================== -->
-
+    
     <!-- ComputedID Connector for generating eduPersonTargetedID attributes -->
     <!-- Deprecated by the Shibboleth team but still likely to be needed in the UK federation for some time -->
 
-    <resolver:DataConnector xsi:type="ComputedId" id="computedID"
+    <resolver:DataConnector xsi:type="dc:ComputedId" id="computedID"
                             generatedAttributeID="computedID"
                             sourceAttributeID="objectSid"
                             salt="%{idp.attribute.resolver.salt}">
         <resolver:Dependency ref="myLDAP" />
     </resolver:DataConnector>
-
+  
     <!--
     LDAP Connector
     See ldap.properties for details
@@ -130,7 +157,7 @@
         </dc:FilterTemplate>
         <dc:ReturnAttributes>%{idp.attribute.resolver.LDAP.returnAttributes}</dc:ReturnAttributes>
         <dc:LDAPProperty name="java.naming.ldap.attributes.binary" value="objectSid" />
-        <!--<dc:LDAPProperty name="java.naming.referral" value="follow"/>-->
+	<!--<dc:LDAPProperty name="java.naming.referral" value="follow"/>-->
     </resolver:DataConnector>
 
 </resolver:AttributeResolver>
